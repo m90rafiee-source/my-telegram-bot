@@ -8,10 +8,15 @@ from telegram.ext import (
     filters,
 )
 import os
+import sys
 
-# ⚡ اصلاح توکن: باید اسم Environment Variable باشه، نه خود توکن
+# ⚡ گرفتن توکن از Environment Variable
 TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = 8106508897
+
+if not TOKEN:
+    print("❌ خطا: توکن BOT_TOKEN ست نشده! لطفاً Environment Variable رو بررسی کن.")
+    sys.exit(1)  # متوقف کردن برنامه
 
 user_reply_map = {}  # نگهداری وضعیت پاسخ
 
