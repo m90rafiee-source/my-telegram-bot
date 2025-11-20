@@ -7,17 +7,16 @@ from telegram.ext import (
     CallbackQueryHandler,
     filters,
 )
+import os
 
-TOKEN = "8497708935:AAFOVmONJ1AHxGcno95A2KiP6C7EXS4jCqg"
+TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = 8106508897
 
-# نگهداری وضعیت پاسخ
-user_reply_map = {}  # کلید: کاربر، مقدار: پیام ادمین در حال پاسخ
+user_reply_map = {}  # نگهداری وضعیت پاسخ
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("هرچی‌میخوای به صورت ناشناس به ممد بگو")
 
-# ارسال پیام از کاربر به ادمین
 async def forward_to_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     text = update.message.text
@@ -38,7 +37,6 @@ async def forward_to_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await update.message.reply_text("پیامتو بهش رسوندم", reply_markup=user_keyboard)
 
-# هندل دکمه‌های پاسخ
 async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -52,7 +50,6 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["reply_to"] = ADMIN_ID
         await query.message.reply_text("پیامتو برای ممد بنویس.")
 
-# هندل پیام‌های عادی
 async def handle_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     text = update.message.text
@@ -61,7 +58,6 @@ async def handle_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user.id == ADMIN_ID and "reply_to" in context.user_data:
         target_id = context.user_data["reply_to"]
 
-        # گرفتن یوزرنیم یا اسم کاربر
         try:
             target_user = await context.bot.get_chat(target_id)
             target_username = f"@{target_user.username}" if target_user.username else target_user.full_name
@@ -99,15 +95,15 @@ async def handle_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("پیامت به ممد ارسال شد", reply_markup=user_keyboard)
 
-# اجرای بات
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_reply))
     app.add_handler(CallbackQueryHandler(handle_button))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_reply))
 
-    app.run_polling()
+    # مهم: اجرای صحیح در نسخه 20.7
+    app.run_polling(close_loop=False)
 
 if __name__ == "__main__":
     main()
