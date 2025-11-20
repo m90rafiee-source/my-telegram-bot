@@ -7,22 +7,21 @@ from telegram.ext import (
     CallbackQueryHandler,
     filters,
 )
-import os
-import sys
 
-# ⚡ گرفتن توکن از Environment Variable
-TOKEN = os.getenv("BOT_TOKEN")
+# ⚡ مستقیم توکن داخل کد (برای راحتی Deploy)
+TOKEN = "8497708935:AAFOVmONJ1AHxGcno95A2KiP6C7EXS4jCqg"
 ADMIN_ID = 8106508897
 
-if not TOKEN:
-    print("❌ خطا: توکن BOT_TOKEN ست نشده! لطفاً Environment Variable رو بررسی کن.")
-    sys.exit(1)  # متوقف کردن برنامه
+# نگهداری وضعیت پاسخ کاربر به ادمین
+user_reply_map = {}  # کلید: کاربر، مقدار: پیام ادمین در حال پاسخ
 
-user_reply_map = {}  # نگهداری وضعیت پاسخ
-
+# --------------------------------------
+# فرمان /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("هرچی‌میخوای به صورت ناشناس به ممد بگو")
 
+# --------------------------------------
+# هندل پیام‌های کاربر و فوروارد به ادمین
 async def forward_to_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     text = update.message.text
@@ -43,6 +42,8 @@ async def forward_to_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
     await update.message.reply_text("پیامتو بهش رسوندم", reply_markup=user_keyboard)
 
+# --------------------------------------
+# هندل دکمه‌های Inline
 async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -56,10 +57,13 @@ async def handle_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["reply_to"] = ADMIN_ID
         await query.message.reply_text("پیامتو برای ممد بنویس.")
 
+# --------------------------------------
+# هندل پیام‌های عادی
 async def handle_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     text = update.message.text
 
+    # اگر ادمین پاسخ می‌دهد
     if user.id == ADMIN_ID and "reply_to" in context.user_data:
         target_id = context.user_data["reply_to"]
 
@@ -82,6 +86,7 @@ async def handle_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"پاسخ به {target_username} ارسال شد:\n{text}")
         return
 
+    # اگر پیام از کاربر است → ارسال به ادمین
     username = f"@{user.username}" if user.username else user.full_name
 
     keyboard = InlineKeyboardMarkup([
@@ -99,6 +104,8 @@ async def handle_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("پیامت به ممد ارسال شد", reply_markup=user_keyboard)
 
+# --------------------------------------
+# اجرای بات
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
 
@@ -106,7 +113,8 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_button))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_reply))
 
-    app.run_polling(close_loop=False)
+    app.run_polling()
 
+# --------------------------------------
 if __name__ == "__main__":
     main()
