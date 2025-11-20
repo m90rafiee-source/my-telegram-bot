@@ -9,7 +9,7 @@ from telegram.ext import (
 )
 import os
 
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv(8497708935:AAFOVmONJ1AHxGcno95A2KiP6C7EXS4jCqg)
 ADMIN_ID = 8106508897
 
 user_reply_map = {}  # نگهداری وضعیت پاسخ
