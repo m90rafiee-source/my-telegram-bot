@@ -9,7 +9,8 @@ from telegram.ext import (
 )
 import os
 
-TOKEN = os.getenv(8497708935:AAFOVmONJ1AHxGcno95A2KiP6C7EXS4jCqg)
+# ⚡ اصلاح توکن: باید اسم Environment Variable باشه، نه خود توکن
+TOKEN = os.getenv("8497708935:AAFOVmONJ1AHxGcno95A2KiP6C7EXS4jCqg")
 ADMIN_ID = 8106508897
 
 user_reply_map = {}  # نگهداری وضعیت پاسخ
@@ -54,7 +55,6 @@ async def handle_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     text = update.message.text
 
-    # اگر ادمین پاسخ می‌دهد
     if user.id == ADMIN_ID and "reply_to" in context.user_data:
         target_id = context.user_data["reply_to"]
 
@@ -77,7 +77,6 @@ async def handle_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"پاسخ به {target_username} ارسال شد:\n{text}")
         return
 
-    # اگر پیام از کاربر است → ارسال به ادمین
     username = f"@{user.username}" if user.username else user.full_name
 
     keyboard = InlineKeyboardMarkup([
@@ -102,7 +101,6 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_button))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_reply))
 
-    # مهم: اجرای صحیح در نسخه 20.7
     app.run_polling(close_loop=False)
 
 if __name__ == "__main__":
